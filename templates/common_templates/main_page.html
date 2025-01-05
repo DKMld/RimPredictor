@@ -1,0 +1,137 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+
+    {% block head %}
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Rim Model Identifier</title>
+    {% endblock %}
+
+    {% block style %}
+        <link rel="stylesheet" href="{% static 'common_static/main_page.css' %}">
+    {% endblock %}
+
+</head>
+
+
+<body>
+
+    {% block navi %}
+    <nav>
+        <a href="#" class="logo">Rim Identifier</a>
+        <ul>
+            <li><a href="{% url 'home page' %}">Home</a></li>
+            {% if user_is_auth %}
+                <li><a href="{% url 'logout user' %}">Log Out</a></li>
+            {% elif not user_is_auth %}
+                <li><a href="{% url 'login user' %}">Log In</a></li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endblock %}
+
+    {% block content %}
+        <div>
+            <div class="container">
+                <h1>Rim Model Identifier</h1>
+
+                <p>Upload a picture of your car's wheel to identify the rim's model.</p>
+
+                <form method="post" action="{% url 'user predict' %}" enctype="multipart/form-data">
+                    {% csrf_token %}
+
+                    <div class="upload-area">
+                        <label for="file-upload">Click to upload a picture</label>
+                        {{ picture_form }}
+                    </div>
+                    {% if user_is_auth %}
+                        <input type="submit"  class="btn" id="identify-btn" value="Predict">
+                    {% else %}
+                        <a href="{% url 'login user' %}">
+                            <input type="button"  class="btn" id="identify-btn" value="Log In">
+                        </a>
+                    {% endif %}
+                </form>
+
+            </div>
+
+            {% if user_is_auth %}
+                {% if prediction_result %}
+
+                    <div>
+                        <div class="containerResult">
+                            <h4 style="color: black;">
+                                {{ prediction_result }}
+                            </h4>
+                        </div>
+
+{#                        {% else %}#}
+{#                            <div class="containerResult">#}
+{#                            <h4 style="color: black;">#}
+{#                                <h4 style="color: black;">Something went wrong, please try again later.</h4>#}
+{#                            </h4>#}
+{#                        </div>#}
+                    </div>
+
+                {% endif %}
+            {% endif %}
+
+
+            <div>
+                <div class="containerPicUpload" id="containerPicUpload"></div>
+            </div>
+        </div>
+
+    {% endblock %}
+
+    <footer>
+        <p>&copy; 2024 Rim Identifier. All rights reserved. Designed with <a href="#">passion</a>.</p>
+    </footer>
+
+    <script>
+
+{#        // Placeholder script for potential interactivity#}
+{#        document.getElementById('identify-btn').addEventListener('click', () => {#}
+{#            alert('Feature under development.');#}
+{#        });#}
+
+        document.getElementById('id_image').addEventListener('change', function(event) {
+          const file = event.target.files[0];
+          const previewBox = document.getElementById('containerPicUpload');
+
+          // Clear previous preview (if any)
+          previewBox.innerHTML = '';
+          previewBox.style.opacity = '100'
+
+          if (file) {
+            const reader = new FileReader();
+
+            reader.onload = function(e) {
+              const img = document.createElement('img');
+                img.style.width = '256px'
+                img.style.height = '256px'
+                img.style.objectFit = 'cover'
+                img.src = e.target.result; // Set the image source to the uploaded file
+                previewBox.appendChild(img);
+            };
+
+            reader.readAsDataURL(file); // Convert the file to a data URL
+          }
+
+        });
+
+
+
+
+
+
+
+    </script>
+
+
+</body>
+</html>

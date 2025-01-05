@@ -1,0 +1,61 @@
+{% extends 'common_templates/main_page.html' %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% block head %}
+        <meta charset="UTF§-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Register Page</title>
+    {% endblock %}
+
+    {% block style %}
+        {{ block.super }}
+        <link rel="stylesheet" href="{% static 'account_static/register_page.css' %}">
+    {% endblock %}
+
+</head>
+
+    <body>
+
+        {% block content %}
+            <div class="login_register_container">
+                <div>
+                    <h1>Register</h1>
+                </div>
+
+                <form class="forms" method="POST" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div>
+                        {% for field in form %}
+                        <input type="text" class="input_box"{{ field }}>
+                        {% endfor %}
+
+                        <input class="input-button" type="submit" name="login register button" value="Register">
+                    </div>
+
+                    <div>
+                        <a href="/login" style="color: black; font-size: 18px">Already have an account? </a>
+                    </div>
+                </form>
+
+            </div>
+
+            <script>
+                let form_fields = document.getElementsByTagName('input')
+
+                form_fields[1].placeholder='Username *'
+                form_fields[1].name='username'
+
+                form_fields[2].placeholder='Password *'
+                form_fields[2].name='password'
+
+                form_fields[3].placeholder='Email'
+                form_fields[3].name='email'
+            </script>
+
+        {% endblock %}
+
+    </body>
+</html>

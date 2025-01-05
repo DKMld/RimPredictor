@@ -1,0 +1,30 @@
+{% extends 'account_templates/register_page.html' %}
+{% load static %}
+
+
+{% block content %}
+    <div class="login_register_container">
+                <div>
+                    <h1>Log In</h1>
+                </div>
+
+                {% for msg in messages %}
+                    <h4 style="color: red">{{ msg }}</h4>
+                {% endfor %}
+
+                <form class="forms" method="POST" enctype="multipart/form-data">
+                    {% csrf_token %}
+
+                    <div>
+                        <input type="text" placeholder="Username *" class="input_box" name="username">
+                        <input type="password" placeholder="Password *" class="input_box" name="paswrd" >
+                        <input class="input-button" type="submit" name="login register button" value="Log In">
+                    </div>
+
+                    <div>
+                        <a href="/register" style="color: black; font-size: 18px">Don't have an account?</a>
+                    </div>
+                </form>
+
+            </div>
+{% endblock %}
