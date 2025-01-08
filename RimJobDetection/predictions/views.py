@@ -9,6 +9,7 @@ import pandas as pd
 import torch
 import torch.nn.functional as F
 from RimJobDetection.common.forms import UserUploadedPictureForm
+from RimJobDetection.predictions.models import UserSearchHistory
 
 
 def get_label(index):
@@ -39,7 +40,6 @@ def make_prediction(image_path):
     preprocess = transforms.Compose([
         transforms.Resize((128, 128)),
         transforms.ToTensor(),
-        # transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
     ])
 
     image_path = image_path
@@ -53,8 +53,6 @@ def make_prediction(image_path):
 
     confidence, predicted = torch.max(probability, 1)
 
-    print(confidence)
-
     if confidence > 0.75:
         return get_label(int(predicted))
     else:
@@ -65,19 +63,30 @@ def prediction(request):
     if request.method == 'POST':
 
         uploaded_image_form = UserUploadedPictureForm(request.POST, request.FILES)
-
         if uploaded_image_form.is_valid():
             uploaded_image = uploaded_image_form.cleaned_data['image']
 
             fs = FileSystemStorage(location=settings.MEDIA_ROOT)
-            filename = fs.save(uploaded_image.name, uploaded_image)  # Save the file
+            filename = fs.save(uploaded_image.name, uploaded_image)
             file_path = fs.path(filename)
 
             image_prediction = make_prediction(file_path)
 
-            if image_prediction is not None:
-                request.session['prediction'] = f'The rims in the picture you provided should be {image_prediction}'
-            else:
-                request.session['prediction'] = "The model couldn't recognize the rims from the picture"
+            image_hash = UserSearchHistory.calculate_image_hash(uploaded_image)
+            image_exists = UserSearchHistory.objects.filter(user=request.user, image_hash=image_hash)
+
+            if image_exists:
+                get_saved_prediction = image_exists.get().model_prediction
+                request.session['prediction'] = f'The rims in the picture you provided should be {get_saved_prediction}'
+            elif not image_exists:
+                if image_prediction is not None:
+                    UserSearchHistory.objects.create(user=request.user,
+                                                     image=uploaded_image,
+                                                     model_prediction=image_prediction,
+                                                     image_hash=image_hash
+                                                     )
+                    request.session['prediction'] = f'The rims in the picture you provided should be {image_prediction}'
+                else:
+                    request.session['prediction'] = "The model couldn't recognize the rims from the picture"
 
         return redirect('home page')
