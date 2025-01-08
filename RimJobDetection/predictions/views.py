@@ -44,7 +44,7 @@ def make_prediction(image_path):
 
     image_path = image_path
     image = Image.open(image_path)
-    input_tensor = preprocess(image).unsqueeze(0)  # Add batch dimension
+    input_tensor = preprocess(image).unsqueeze(0)
 
     with torch.no_grad():
         output = model(input_tensor)
